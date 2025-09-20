@@ -1,4 +1,42 @@
-<?php include_once '../includes/topnav.php';?>
+<?php 
+include_once '../includes/topnav.php';
+// Process toast message from session
+// Session is already started in topnav.php
+$toast_message = '';
+$toast_type = '';
+
+if (isset($_SESSION['toast_message'])) {
+    $toast_message = $_SESSION['toast_message'];
+    $toast_type = $_SESSION['toast_type'];
+    // Clear session message to prevent showing again on page refresh
+    unset($_SESSION['toast_message']);
+    unset($_SESSION['toast_type']);
+}
+?>
+    <!-- Toast Notification -->
+    <?php if (!empty($toast_message)): ?>
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+        <div id="notificationToast" class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <strong class="me-auto">Notification</strong>
+                <small id="toastTime">just now</small>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body <?php echo $toast_type == 'success' ? 'bg-success text-white' : 'bg-danger text-white'; ?>">
+                <?php echo $toast_message; ?>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Auto close toast after 5 seconds
+        setTimeout(function() {
+            var toastElement = document.getElementById('notificationToast');
+            var toast = new bootstrap.Toast(toastElement);
+            toast.hide();
+        }, 5000);
+    </script>
+    <?php endif; ?>
+    
     <!-- Main Content -->
     <div class="container mt-4">
         <div class="row mb-4">
@@ -60,17 +98,60 @@
                                 <thead>
                                     <tr>
                                         <th>Date</th>
-                                        <th>Day</th>
+                                        <th>Student ID</th>
+                                        <th>Name</th>
+                                        <th>Class</th>
                                         <th>Status</th>
                                         <th>Time In</th>
                                         <th>Time Out</th>
-                                        <th>Duration</th>
                                         <th>Notes</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <td colspan="7" class="text-center">No attendance records found</td>
-                                    <!-- Attendance records will be loaded here -->
+                                    <?php
+                                    // Fetch attendance records with student information
+                                    $attendance_query = "
+                                        SELECT a.*, s.full_name 
+                                        FROM attendance a
+                                        JOIN students s ON a.student_id = s.student_school_id
+                                        WHERE a.deleted_at IS NULL
+                                        ORDER BY a.attendance_date DESC, s.full_name ASC
+                                    ";
+                                    $attendance_result = $conn->query($attendance_query);
+                                    
+                                    if ($attendance_result->num_rows > 0) {
+                                        while ($row = $attendance_result->fetch_assoc()) {
+                                            // Determine badge color based on status
+                                            $badge_class = 'bg-secondary';
+                                            if ($row['status'] == 'present') {
+                                                $badge_class = 'bg-success';
+                                            } elseif ($row['status'] == 'absent') {
+                                                $badge_class = 'bg-danger';
+                                            } elseif ($row['status'] == 'late') {
+                                                $badge_class = 'bg-warning text-dark';
+                                            } elseif ($row['status'] == 'excused') {
+                                                $badge_class = 'bg-info';
+                                            }
+                                            
+                                            // Format time
+                                            $time_in = $row['time_in'] ? date('h:i A', strtotime($row['time_in'])) : '-';
+                                            $time_out = $row['time_out'] ? date('h:i A', strtotime($row['time_out'])) : '-';
+                                            
+                                            echo '<tr>';
+                                            echo '<td>' . date('Y-m-d', strtotime($row['attendance_date'])) . '</td>';
+                                            echo '<td>' . htmlspecialchars($row['student_id']) . '</td>';
+                                            echo '<td>' . htmlspecialchars($row['full_name']) . '</td>';
+                                            echo '<td>' . htmlspecialchars($row['class']) . '</td>';
+                                            echo '<td><span class="badge ' . $badge_class . '">' . ucfirst($row['status']) . '</span></td>';
+                                            echo '<td>' . $time_in . '</td>';
+                                            echo '<td>' . $time_out . '</td>';
+                                            echo '<td>' . htmlspecialchars($row['notes']) . '</td>';
+                                            echo '</tr>';
+                                        }
+                                    } else {
+                                        echo '<tr><td colspan="8" class="text-center">No attendance records found</td></tr>';
+                                    }
+                                    ?>
                                 </tbody>
                             </table>
                         </div>

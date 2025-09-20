@@ -1,4 +1,23 @@
-<?php include_once '../includes/topnav.php'; ?>
+<?php include_once '../includes/topnav.php'; 
+include_once '../app/functions/functions.php';
+// Fetch statistics for dashboard cards
+$counts = count_students();
+$allStudents = $counts['total_students'];
+
+// Get today's attendance statistics
+$today = date('Y-m-d');
+$present_query = "SELECT COUNT(*) as count FROM attendance WHERE attendance_date = '$today' AND status = 'present'";
+$absent_query = "SELECT COUNT(*) as count FROM attendance WHERE attendance_date = '$today' AND status = 'absent'";
+$late_query = "SELECT COUNT(*) as count FROM attendance WHERE attendance_date = '$today' AND status = 'late'";
+
+$present_result = $conn->query($present_query);
+$absent_result = $conn->query($absent_query);
+$late_result = $conn->query($late_query);
+
+$present_count = $present_result->fetch_assoc()['count'];
+$absent_count = $absent_result->fetch_assoc()['count'];
+$late_count = $late_result->fetch_assoc()['count'];
+?>
 <!-- Main Content -->
 <div class="container mt-4">
     <!-- Welcome Section -->
@@ -6,7 +25,9 @@
         <div class="col-12">
             <div class="card dashboard-card">
                 <div class="card-body">
-                    <h2 class="card-title">Welcome, Kama<span id="welcomeUsername"></span>!</h2>
+                    <h2 class="card-title">
+                        Welcome, <?php echo isset($_SESSION['user_name']) ? htmlspecialchars($_SESSION['user_name']) : 'Guest'; ?>!
+                    </h2>
                     <p class="card-text">Here's your attendance summary for this month.</p>
                 </div>
             </div>
@@ -19,8 +40,8 @@
             <div class="card dashboard-card text-center">
                 <div class="card-header">Present</div>
                 <div class="card-body">
-                    <h3 class="card-title status-present" id="presentCount">0</h3>
-                    <p class="card-text">Days</p>
+                    <h3 class="card-title status-present" id="presentCount"><?php echo $present_count; ?></h3>
+                    <p class="card-text">Students Today</p>
                 </div>
             </div>
         </div>
@@ -28,8 +49,8 @@
             <div class="card dashboard-card text-center">
                 <div class="card-header">Absent</div>
                 <div class="card-body">
-                    <h3 class="card-title status-absent" id="absentCount">0</h3>
-                    <p class="card-text">Days</p>
+                    <h3 class="card-title status-absent" id="absentCount"><?php echo $absent_count; ?></h3>
+                    <p class="card-text">Students Today</p>
                 </div>
             </div>
         </div>
@@ -37,8 +58,8 @@
             <div class="card dashboard-card text-center">
                 <div class="card-header">Late</div>
                 <div class="card-body">
-                    <h3 class="card-title status-late" id="lateCount">0</h3>
-                    <p class="card-text">Days</p>
+                    <h3 class="card-title status-late" id="lateCount"><?php echo $late_count; ?></h3>
+                    <p class="card-text">Students Today</p>
                 </div>
             </div>
         </div>
@@ -59,7 +80,7 @@
             <div class="card dashboard-card text-center">
                 <div class="card-header">Total Students</div>
                 <div class="card-body">
-                    <h3 class="card-title" id="totalStudents">0</h3>
+                    <h3 class="card-title" id="totalStudents"><?=$allStudents?></h3>
                     <p class="card-text">Registered</p>
                 </div>
             </div>
@@ -213,10 +234,26 @@
             <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
         </div>
         <div class="toast-body" id="toastMessage">
-            Welcome to the Attendance Star!
+            <?php echo isset($_SESSION['toast_message']) ? htmlspecialchars($_SESSION['toast_message']) : 'Operation completed successfully!'; ?>
         </div>
     </div>
 </div>
+
+<?php if (isset($_SESSION['toast_message'])): ?>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var toast = document.getElementById('notificationToast');
+            var toastMessage = document.getElementById('toastMessage');
+            var toastTime = document.getElementById('toastTime');
+            toastMessage.textContent = <?php echo json_encode($_SESSION['toast_message']); ?>;
+            toastMessage.className = 'toast-body bg-success text-white';
+            toastTime.textContent = 'just now';
+            var bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+        });
+    </script>
+    <?php unset($_SESSION['toast_message']); ?>
+<?php endif; ?>
 
 <!-- Chart.js -->
 <script src="../libraries/Chart.min.js"></script>

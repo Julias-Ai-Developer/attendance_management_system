@@ -1,3 +1,8 @@
+<?php
+session_start();
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -23,7 +28,7 @@
                     <h2 class="card-title">Attendance Star</h2>
                     <p class="text-muted">Please login to continue</p>
                 </div>
-                <form id="loginForm">
+                <form id="loginForm" action="../app/auth/auth.php" method="post">
                     <div class="mb-3">
                         <label for="Email" class="form-label">Email/Phone Number</label>
                         <input type="text" class="form-control" id="user_credential" name="user_credential" required>
@@ -46,7 +51,6 @@
     </div>
 
     <!-- Bootstrap 5 JS Bundle with Popper -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Custom JS -->
     <script src="js/auth.js"></script>
     
@@ -84,5 +88,23 @@
     <footer class="text-center py-3 mt-4 text-muted">
         <small>© 2023 Attendance Star | All Rights Reserved</small>
     </footer>
+
+    <?php if (isset($_SESSION['toast_message'])): ?>
+    <div class="alert alert-warning alert-dismissible fade show mt-3" role="alert">
+        <?php echo htmlspecialchars($_SESSION['toast_message']); ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var toast = document.getElementById('notificationToast');
+            var toastMessage = document.getElementById('toastMessage');
+            toastMessage.textContent = <?php echo json_encode($_SESSION['toast_message']); ?>;
+            toastMessage.className = 'toast-body bg-danger text-white';
+            var bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+        });
+    </script>
+    <?php unset($_SESSION['toast_message']); ?>
+    <?php endif; ?>
 </body>
 </html>

@@ -1,4 +1,4 @@
-<?php include_once '../includes/topnav.php';
+views/students.php<?php include_once '../includes/topnav.php';
 
 $fetch_students = $conn->query("SELECT * from students WHERE deleted_at IS NULL ORDER BY id DESC");
 $fetch_classes_attendance = $conn->query("SELECT class_name FROM student_classes WHERE deleted_at IS NULL ORDER BY id DESC");
@@ -7,27 +7,6 @@ $fetch_classes_edit = $conn->query("SELECT class_name FROM student_classes WHERE
 $fetch_classes_filter = $conn->query("SELECT class_name FROM student_classes WHERE deleted_at IS NULL ORDER BY id DESC");
 $fetch_gender = $conn->query("SELECT gender from students WHERE deleted_at IS NULL");
 
-// Check if attendance table exists, if not create it
-$check_table = $conn->query("SHOW TABLES LIKE 'attendance'");
-if ($check_table->num_rows == 0) {
-    $create_table = "CREATE TABLE attendance (
-        id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
-        student_id VARCHAR(50) NOT NULL,
-        attendance_date DATE NOT NULL,
-        class VARCHAR(50) NOT NULL,
-        status ENUM('present', 'absent', 'late', 'excused') NOT NULL DEFAULT 'present',
-        time_in TIME NULL,
-        time_out TIME NULL,
-        notes TEXT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP NULL,
-        deleted_at TIMESTAMP NULL,
-        INDEX (student_id),
-        INDEX (attendance_date),
-        INDEX (class)
-    )";
-    $conn->query($create_table);
-}
 ?>
 
 <!-- Main Content -->
@@ -152,16 +131,14 @@ if ($check_table->num_rows == 0) {
                             </select>
                         </div>
                         <div class="col-md-8 d-flex align-items-end">
-                            <button type="button" class="btn btn-primary" id="loadStudentsForAttendance" onclick="loadStudentsForAttendance()">
+                            <button class="btn btn-primary" id="loadStudentsForAttendance" name="load_students" >
                                 <i class="fas fa-users me-1"></i> Load Students
                             </button>
                         </div>
                     </div>
 
                     <!-- Attendance Form -->
-                    <form id="attendanceForm" class="d-none" action="../app/attendance/add-attendance.php" method="post">
-                        <input type="hidden" id="attendance_date" name="attendance_date">
-                        <input type="hidden" id="class" name="class">
+                    <form id="attendanceForm" class="d-none">
                         <div class="table-responsive">
                             <table class="table table-striped table-hover" id="attendanceTable">
                                 <thead>
@@ -175,12 +152,16 @@ if ($check_table->num_rows == 0) {
                                     </tr>
                                 </thead>
                                 <tbody id="attendanceTableBody">
+                                    <?php
+                                   
+
+                                    ?>
                                     <!-- Students for attendance will be loaded here -->
                                 </tbody>
                             </table>
                         </div>
                         <div class="text-end mt-3">
-                            <button type="submit" class="btn btn-success" id="saveAttendanceBtn">
+                            <button type="submit" class="btn btn-success">
                                 <i class="fas fa-save me-1"></i> Save Attendance
                             </button>
                         </div>
@@ -406,6 +387,4 @@ if ($check_table->num_rows == 0) {
 <?php unset($_SESSION['toast_message']);
 endif; ?>
 
-<script src="../assets/js/students.js"></script>
-<script src="../assets/js/attendance.js"></script>
-<?php include_once '../includes/footer.php'; ?>
+<?php include_once '../includes/footer.php' ?>

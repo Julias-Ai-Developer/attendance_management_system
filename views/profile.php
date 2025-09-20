@@ -1,4 +1,16 @@
-<?php include_once '../includes/topnav.php';?>
+<?php include_once '../includes/topnav.php';
+
+$userId = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
+$userData = null;
+if ($userId) {
+    $stmt = $conn->prepare("SELECT first_name, last_name, email, phone_number, user_name FROM users WHERE id = ? LIMIT 1");
+    $stmt->bind_param("i", $userId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $userData = $result->fetch_assoc();
+    $stmt->close();
+}
+?>
 
     <!-- Main Content -->
     <div class="container mt-4">
@@ -6,9 +18,9 @@
         <div class="row mb-4">
             <div class="col-12">
                 <div class="profile-header text-center py-5">
-                    <img src="" alt="Profile" class="profile-img mb-3" id="profileImage">
-                    <h2 id="profileName">Student Name</h2>
-                    <p class="text-light mb-0" id="profileStudentId">Student ID: STU001</p>
+                    <img src="../assets/img/CEO.jpg" alt="Profile" class="profile-img mb-3" id="profileImage">
+                    <h2 id="profileName"><?php echo $userData ? htmlspecialchars($userData['first_name'] . ' ' . $userData['last_name']) : 'User'; ?></h2>
+                    <p class="text-light mb-0" id="profileStudentId">Username: <?php echo $userData ? htmlspecialchars($userData['user_name']) : '-'; ?></p>
                 </div>
             </div>
         </div>
@@ -24,25 +36,25 @@
                         <div class="mb-3 row">
                             <label class="col-sm-4 col-form-label">Full Name:</label>
                             <div class="col-sm-8">
-                                <p class="form-control-plaintext" id="infoName">John Doe</p>
-                            </div>
-                        </div>
-                        <div class="mb-3 row">
-                            <label class="col-sm-4 col-form-label">Student ID:</label>
-                            <div class="col-sm-8">
-                                <p class="form-control-plaintext" id="infoStudentId">STU001</p>
-                            </div>
-                        </div>
-                        <div class="mb-3 row">
-                            <label class="col-sm-4 col-form-label">Email:</label>
-                            <div class="col-sm-8">
-                                <p class="form-control-plaintext" id="infoEmail">john.doe@example.com</p>
+                                <p class="form-control-plaintext" id="infoName"><?php echo $userData ? htmlspecialchars($userData['first_name'] . ' ' . $userData['last_name']) : '-'; ?></p>
                             </div>
                         </div>
                         <div class="mb-3 row">
                             <label class="col-sm-4 col-form-label">Username:</label>
                             <div class="col-sm-8">
-                                <p class="form-control-plaintext" id="infoUsername">student1</p>
+                                <p class="form-control-plaintext" id="infoUsername"><?php echo $userData ? htmlspecialchars($userData['user_name']) : '-'; ?></p>
+                            </div>
+                        </div>
+                        <div class="mb-3 row">
+                            <label class="col-sm-4 col-form-label">Email:</label>
+                            <div class="col-sm-8">
+                                <p class="form-control-plaintext" id="infoEmail"><?php echo $userData ? htmlspecialchars($userData['email']) : '-'; ?></p>
+                            </div>
+                        </div>
+                        <div class="mb-3 row">
+                            <label class="col-sm-4 col-form-label">Phone Number:</label>
+                            <div class="col-sm-8">
+                                <p class="form-control-plaintext" id="infoPhoneNumber"><?php echo $userData ? htmlspecialchars($userData['phone_number']) : '-'; ?></p>
                             </div>
                         </div>
                         <div class="text-end">

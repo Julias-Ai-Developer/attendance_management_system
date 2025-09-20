@@ -1,7 +1,10 @@
-
 <?php
 include_once '../includes/config.php';
 session_start();
+if (!isset($_SESSION['user_id'])) {
+    header('Location: ../views/login.php');
+    exit;
+}
 ?>
 
 
@@ -20,6 +23,7 @@ session_start();
     <link rel="stylesheet" href="../assets/css/dataTables.bootstrap5.min.css">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="../assets/css/style.css">
+   
 </head>
 <body>
     <!-- Navbar -->
@@ -81,13 +85,31 @@ session_start();
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <img src="../assets/img/CEO.jpg" alt="Profile" class="rounded-circle" width="30" height="30" id="navProfileImg">
-                            <span id="navUsername">julias Muyambi</span>
+                            <span id="navUsername">
+                                <?php
+                                if (isset($_SESSION['user_id'])) {
+                                    $userId = $_SESSION['user_id'];
+                                    $stmt = $conn->prepare("SELECT first_name, last_name FROM users WHERE id = ? LIMIT 1");
+                                    $stmt->bind_param("i", $userId);
+                                    $stmt->execute();
+                                    $result = $stmt->get_result();
+                                    if ($user = $result->fetch_assoc()) {
+                                        echo htmlspecialchars($user['first_name'] . ' ' . $user['last_name']);
+                                    } else {
+                                        echo 'User';
+                                    }
+                                    $stmt->close();
+                                } else {
+                                    echo 'Guest';
+                                }
+                                ?>
+                            </span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                             <li><a class="dropdown-item" href="profile.php"><i class="fas fa-user me-2"></i>My Profile</a></li>
                             <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i>Settings</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="#"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                            <li><a class="dropdown-item" href="../app/auth/logout.php"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
                         </ul>
                     </li>
                 </ul>

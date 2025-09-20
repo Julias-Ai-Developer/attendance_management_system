@@ -25,47 +25,12 @@ function showToast(message, type = 'success') {
     bsToast.show();
 }
 
-// Handle filter application
+// Example: Show toast when 'Apply Filters' button is clicked
 document.addEventListener('DOMContentLoaded', function() {
     var applyFiltersBtn = document.getElementById('applyFilters');
     if (applyFiltersBtn) {
         applyFiltersBtn.addEventListener('click', function() {
-            const classFilter = document.getElementById('classFilter').value;
-            const statusFilter = document.getElementById('statusFilter').value;
-            
-            // Show loading indicator
-            document.getElementById('studentsTableBody').innerHTML = '<tr><td colspan="8" class="text-center">Loading students...</td></tr>';
-            
-            // Apply filters via AJAX
-            $.ajax({
-                url: '../app/students/filter_students.php',
-                type: 'POST',
-                data: {
-                    class: classFilter,
-                    status: statusFilter
-                },
-                dataType: 'json',
-                success: function(response) {
-                    if (response.status === 'success') {
-                        // Update table
-                        if (response.data.length > 0) {
-                            document.getElementById('studentsTableBody').innerHTML = response.data.join('');
-                        } else {
-                            document.getElementById('studentsTableBody').innerHTML = '<tr><td colspan="8" class="text-center">No students found</td></tr>';
-                        }
-                        
-                        // Show toast notification
-                        showToast('Filters applied successfully. Found ' + response.count + ' students.', 'success');
-                    } else {
-                        // Show error toast
-                        showToast('Error applying filters: ' + response.message, 'error');
-                    }
-                },
-                error: function(xhr, status, error) {
-                    console.error('AJAX Error:', xhr, status, error);
-                    showToast('Error applying filters: ' + error, 'error');
-                }
-            });
+            showToast('Filters applied successfully!', 'success');
         });
     }
 
